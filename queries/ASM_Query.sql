@@ -188,3 +188,87 @@ INSERT INTO Diem
 -- SV 10
 (1010, 6, 1, 3, 8.5),
 (1010, 7, 2, 5, 9.0);
+------------------------
+
+CREATE INDEX idx_sinhvien_ma_lop
+ON SinhVien(ma_lop);
+
+CREATE INDEX idx_diem_ma_sinhvien
+ON Diem(ma_sinh_vien);
+-------------------------------
+
+CREATE VIEW vw_bang_diem_sinh_vien AS
+SELECT
+    sv.ma_sinh_vien,
+    sv.ho_ten,
+    l.ten_lop,
+    mh.ten_mon,
+    hk.ten_hoc_ky,
+    gv.ho_ten AS giang_vien,
+    d.diem
+FROM Diem d
+JOIN SinhVien sv 
+    ON d.ma_sinh_vien = sv.ma_sinh_vien
+JOIN Lop l 
+    ON sv.ma_lop = l.ma_lop
+JOIN MonHoc mh 
+    ON d.ma_mon = mh.ma_mon
+JOIN HocKy hk 
+    ON d.ma_hoc_ky = hk.ma_hoc_ky
+JOIN GiangVien gv 
+    ON d.ma_giang_vien = gv.ma_giang_vien;
+    
+    
+    SELECT *FROM SinhVien WHERE gioi_tinh = 'Nu' ORDER BY ho_ten LIMIT 5;
+	SELECT *FROM SinhVien WHERE ma_sinh_vien = '1005';
+    
+    SELECT
+    sv.ho_ten,
+    l.ten_lop,
+    k.ten_khoa
+FROM SinhVien sv
+INNER JOIN Lop l
+    ON sv.ma_lop = l.ma_lop
+INNER JOIN Khoa k
+    ON l.ma_khoa = k.ma_khoa;
+    
+    SELECT
+    l.ten_lop,
+    sv.ho_ten
+FROM Lop l
+LEFT JOIN SinhVien sv
+    ON l.ma_lop = sv.ma_lop
+ORDER BY l.ten_lop;
+
+SELECT
+    mh.ten_mon,
+    COUNT(d.ma_sinh_vien) AS so_sinh_vien,
+    AVG(d.diem) AS diem_trung_binh,
+    MAX(d.diem) AS diem_cao_nhat,
+    MIN(d.diem) AS diem_thap_nhat
+FROM Diem d
+JOIN MonHoc mh
+    ON d.ma_mon = mh.ma_mon
+GROUP BY mh.ma_mon, mh.ten_mon;
+
+SELECT
+    ho_ten
+FROM SinhVien
+WHERE ma_sinh_vien IN (
+    SELECT ma_sinh_vien
+    FROM Diem
+    WHERE diem > 8);
+    
+    
+SELECT
+    sv.ho_ten,
+    d.diem,
+    CASE
+        WHEN d.diem >= 8.5 THEN 'Gioi'
+        WHEN d.diem >= 7.0 THEN 'Kha'
+        WHEN d.diem >= 5.0 THEN 'Trung binh'
+        ELSE 'Yeu'
+    END AS xep_loai
+FROM Diem d
+JOIN SinhVien sv
+    ON d.ma_sinh_vien = sv.ma_sinh_vien;
